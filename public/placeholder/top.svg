@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <rect width="300" height="400" fill="#e2e5e3"/>
+  <path d="M115 80 L150 105 L185 80 L225 105 L212 165 L196 158 L200 285 L100 285 L104 158 L88 165 L75 105 Z" fill="#c3cac6" stroke="#98a19c" stroke-width="1.5"/>
+  <text x="150" y="372" font-family="sans-serif" font-size="13" fill="#7d857f" text-anchor="middle">待补商品图</text>
+</svg>
