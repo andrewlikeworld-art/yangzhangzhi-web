@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/* ── 站点主题(theme 层)──
+   这一层是**站点差异**,换商家时可以整块替换,不影响 components/ 和 lib/。
+   语义变量沿用 shadcn 命名,所以组件里的 bg-background / text-muted-foreground
+   等类不用改就能换装。
+
+   默认色板:纸墨(米纸底 + 墨黑字)+ 玫瑰强调,对齐 buyer 的 PORTER 编辑风。
+   字体刻意只用系统字体栈,不走 next/font/google —— 境内构建机拉 Google Fonts
+   会失败,且系统字体零网络开销。 */
+
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+    "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: Georgia, "Songti SC", "Noto Serif SC", serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  /* 原始 token */
+  --paper: #ecebe6;
+  --surface: #fbfaf7;
+  --ink: #23241f;
+  --graphite: #5c5f58;
+  --rule: #dedcd4;
+  --brand: #b04a5a; /* 玫瑰:价格、心形选中、可交互强调 */
+
+  /* 语义映射 */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --muted: #e4e2db;
+  --muted-foreground: var(--graphite);
+  --accent: #e4e2db; /* hover 底色 */
+  --accent-foreground: var(--ink);
+  --destructive: oklch(0.505 0.16 27);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--brand);
+  --radius: 0.5rem;
+
+  /* 聊天气泡:顾客侧用品牌色,客服侧用卡片底 */
+  --bubble-user: var(--brand);
+  --bubble-user-fg: #ffffff;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  /* 真实可视高度:移动端键盘弹起时 100dvh 在部分浏览器不收缩,
+     由 layout 里的内联脚本把 visualViewport.height 写进 --app-height。 */
+  .h-app {
+    height: var(--app-height, 100dvh);
+  }
+}
+
+/* AI 回复的 markdown 排版(react-markdown 输出的裸标签)。
+   刻意不引 @tailwindcss/typography —— 客服回复只有段落/列表/强调/表格几种,
+   自己写十几行比拖一个插件划算。 */
+.prose-chat > :first-child {
+  margin-top: 0;
+}
+.prose-chat > :last-child {
+  margin-bottom: 0;
+}
+.prose-chat p {
+  margin: 0.5em 0;
+}
+.prose-chat ul,
+.prose-chat ol {
+  margin: 0.5em 0;
+  padding-left: 1.25em;
+}
+.prose-chat ul {
+  list-style: disc;
+}
+.prose-chat ol {
+  list-style: decimal;
+}
+.prose-chat li {
+  margin: 0.15em 0;
+}
+.prose-chat strong {
+  font-weight: 600;
+}
+.prose-chat code {
+  background: var(--muted);
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+  font-size: 0.9em;
+}
+.prose-chat table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0.5em 0;
+  font-size: 0.9em;
+}
+.prose-chat th,
+.prose-chat td {
+  border: 1px solid var(--border);
+  padding: 0.25em 0.5em;
+  text-align: left;
+}
