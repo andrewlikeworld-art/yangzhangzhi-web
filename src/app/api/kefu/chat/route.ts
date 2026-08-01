@@ -38,11 +38,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ session_id: sessionId, message_id: messageId });
   }
 
+  // 透传访客标识给 cn-kefu(将来按人限流用;当前上游忽略,带上无副作用)。
+  // 只在 /api/chat 上带——限流只挂在这个接口,reply/products 不限。
+  const visitorId = req.headers.get("x-visitor-id");
+
   try {
     const res = await fetch(`${base}/api/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(visitorId ? { "X-Visitor-Id": visitorId } : {}),
         ...(process.env.KEFU_SHARED_KEY
           ? { Authorization: `Bearer ${process.env.KEFU_SHARED_KEY}` }
           : {}),

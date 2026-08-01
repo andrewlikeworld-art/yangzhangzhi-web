@@ -45,6 +45,27 @@ export interface KefuStreamCallbacks {
   onError: (message: string) => void;
 }
 
+/** 稳定访客标识:cn-kefu 将来按人限流用(当前忽略,提前带上,届时自动生效)。
+ *  要求:同一访客稳定不变、纯随机、不含任何个人信息——见 限流429说明 第五节。 */
+const VISITOR_ID_KEY = "yzz_visitor_id";
+
+function getVisitorId(): string {
+  try {
+    let id = localStorage.getItem(VISITOR_ID_KEY);
+    if (!id) {
+      // 非安全上下文(如局域网 http 调试)没有 crypto.randomUUID,退化到普通随机串
+      id =
+        typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `v-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+      localStorage.setItem(VISITOR_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return ""; // 隐私模式等存储不可用时不带标识,BFF 会跳过该头
+  }
+}
+
 const POLL_INTERVAL_MS = 800;
 /** 轮询上限:90 秒。超了就报错收尾,不让气泡永远转圈 */
 const POLL_TIMEOUT_MS = 90_000;
@@ -55,9 +76,13 @@ export async function streamKefuReply(
 ): Promise<void> {
   let messageId: string;
   try {
+    const visitorId = getVisitorId();
     const res = await fetch("/api/kefu/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(visitorId ? { "X-Visitor-Id": visitorId } : {}),
+      },
       body: JSON.stringify({
         message: req.message,
         session_id: req.sessionId,
