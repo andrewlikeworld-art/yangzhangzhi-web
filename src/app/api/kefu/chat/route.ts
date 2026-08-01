@@ -51,10 +51,10 @@ export async function POST(req: NextRequest) {
         message,
         session_id: typeof body.session_id === "string" ? body.session_id : null,
         product_id: typeof body.product_id === "string" ? body.product_id : null,
-        // cn-kefu 侧待支持(未决 I);它现在会忽略这个字段
-        selected_product_ids: Array.isArray(body.selected_product_ids)
-          ? body.selected_product_ids
-          : [],
+        // ⚠️ 止血(2026-08-01):带 selected_product_ids 的请求会让 cn-kefu(线上 045)
+        // 整个生成队列卡死在 pending,连后续普通消息也不回——先不转发,等合伙人侧修复
+        // 后把下面一行换回真实清单。复现记录见 docs/multi-site-discussion.md。
+        selected_product_ids: [],
       }),
       signal: AbortSignal.timeout(10_000),
     });
