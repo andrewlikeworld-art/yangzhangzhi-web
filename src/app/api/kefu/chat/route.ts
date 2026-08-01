@@ -60,6 +60,14 @@ export async function POST(req: NextRequest) {
     });
     const payload = await res.json().catch(() => null);
     if (!res.ok) {
+      // 429 = web 渠道日额度用完(北京时间零点重置)。重试无用,文案绝不能写"稍后再试",
+      // 否则访客反复点击会继续累加计数(被拦下的请求也计入)——见 限流429说明。
+      if (res.status === 429) {
+        return NextResponse.json(
+          { error: "今天的咨询次数已经用完啦,明天再来找我聊吧~" },
+          { status: 429 },
+        );
+      }
       console.error(`[kefu/chat] 上游 ${res.status}:`, payload);
       return NextResponse.json({ error: "客服暂时联系不上,稍后再试" }, { status: 502 });
     }

@@ -69,6 +69,11 @@ export async function streamKefuReply(
       | { session_id?: string; message_id?: string; error?: string }
       | null;
     if (!res.ok || !body?.message_id) {
+      // 429 = 渠道日额度用完,零点才恢复;这里绝不自动重试,也不提示"重试"
+      if (res.status === 429) {
+        cb.onError(body?.error ?? "今天的咨询次数已经用完啦,明天再来找我聊吧~");
+        return;
+      }
       cb.onError(body?.error ?? `发送失败(HTTP ${res.status})`);
       return;
     }
