@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { KefuProductCard } from "@/lib/kefu-client";
 
 // 顾客站前端状态。不持久化(刷新清空);会话历史在 cn-kefu 侧落库,
 // 将来要「续聊」再从 GET /api/history 拉。
@@ -19,6 +20,10 @@ export interface KefuMsg {
   error?: boolean;
   /** 客服调用 show_fit_visualizer 时记该商品 id → 气泡下渲染 <FitVisualizer/> */
   fitVisualizerProductId?: string;
+  /** events: product_cards → 气泡下渲染商品卡行(走事件通道,不在 content 正文里) */
+  cards?: KefuProductCard[];
+  /** events: tool_running → content 为空时气泡里显示的状态提示;content 一有字或到终态就清 */
+  toolRunningLabel?: string;
 }
 
 interface KefuState {

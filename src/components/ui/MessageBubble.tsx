@@ -43,6 +43,13 @@ export function MessageBubble({ msg, personaName }: { msg: KefuMsg; personaName:
               <div className="prose-chat break-words">
                 <Markdown remarkPlugins={[remarkGfm]}>{msg.content}</Markdown>
               </div>
+              {/* 工具轮状态提示:content 还没出字时显示(如「正在核对尺码表」),
+                  出字或到终态由 KefuChat 的更新收口清掉 —— 填的是工具轮那段空白 */}
+              {msg.streaming && !msg.content && msg.toolRunningLabel && (
+                <span className="animate-pulse text-xs text-muted-foreground">
+                  {msg.toolRunningLabel}…
+                </span>
+              )}
               {/* 还在出字:末尾跟一个呼吸光标,空内容时也有反馈 */}
               {msg.streaming && (
                 <span className="ml-0.5 inline-block h-3.5 w-[2px] animate-pulse bg-current align-middle" />

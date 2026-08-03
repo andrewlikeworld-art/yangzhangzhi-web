@@ -3,9 +3,23 @@
 //
 // 状态挂 globalThis:Next dev 的模块热重载会重建模块作用域,挂模块级 Map 会丢 job。
 
+/** 与 cn-kefu store.ts 的 JobEvent 线上形状对齐(mock 只造用得到的那几种) */
+type MockEvent =
+  | { type: "escalated" }
+  | { type: "fit_visualizer" }
+  | { type: "tool_running"; label: string }
+  | {
+      type: "product_cards";
+      products: { id: string; title: string; price: string; cover: string; reason?: string }[];
+    };
+
 interface MockJob {
   full: string;
-  events: { type: "escalated" | "fit_visualizer" }[];
+  events: MockEvent[];
+  /** 出字前的静默期(模拟工具轮):此间只有 earlyEvents,content 为空 */
+  delayMs?: number;
+  /** 静默期就下发的事件(tool_running 要在 content 出字前显示才验得到) */
+  earlyEvents?: MockEvent[];
   startedAt: number;
 }
 
@@ -17,8 +31,8 @@ const CHARS_PER_MS = 1 / 40;
 
 export function createMockJob(message: string): { sessionId: string; messageId: string } {
   const messageId = `mock-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const { reply, events } = pickReply(message);
-  store.set(messageId, { full: reply, events, startedAt: Date.now() });
+  const { reply, events, delayMs, earlyEvents } = pickReply(message);
+  store.set(messageId, { full: reply, events, delayMs, earlyEvents, startedAt: Date.now() });
   // 只留最近 50 条,防内存无限涨
   if (store.size > 50) {
     for (const k of Array.from(store.keys()).slice(0, store.size - 50)) store.delete(k);
@@ -28,21 +42,55 @@ export function createMockJob(message: string): { sessionId: string; messageId: 
 
 export function readMockJob(
   messageId: string,
-): { status: "generating" | "done"; content: string; events: MockJob["events"] } | null {
+): { status: "generating" | "done"; content: string; events: MockEvent[] } | null {
   const job = store.get(messageId);
   if (!job) return null;
-  const chars = Math.floor((Date.now() - job.startedAt) * CHARS_PER_MS);
+  // delayMs 是出字前的静默期(模拟工具轮):此间 content 为空,只发 earlyEvents
+  const chars = Math.max(
+    0,
+    Math.floor((Date.now() - job.startedAt - (job.delayMs ?? 0)) * CHARS_PER_MS),
+  );
   const done = chars >= job.full.length;
   return {
     status: done ? "done" : "generating",
     content: job.full.slice(0, chars),
-    // 事件在出字过半后才给,模拟工具调用发生在回复中途
-    events: chars > job.full.length / 2 ? job.events : [],
+    // earlyEvents 一开始就在;其余事件出字过半后才给,模拟工具调用发生在回复中途
+    events: [
+      ...(job.earlyEvents ?? []),
+      ...(chars > job.full.length / 2 ? job.events : []),
+    ],
   };
 }
 
-function pickReply(message: string): { reply: string; events: MockJob["events"] } {
+function pickReply(message: string): {
+  reply: string;
+  events: MockEvent[];
+  delayMs?: number;
+  earlyEvents?: MockEvent[];
+} {
   const m = message.toLowerCase();
+
+  // 推荐/搭配 → 商品卡 + 工具轮提示(验收 product_cards 与 tool_running 两条渲染路径)
+  if (/推荐|搭配|配什么|穿什么|怎么配|上班穿|约会穿|面试穿/.test(m)) {
+    return {
+      reply:
+        "按你说的场景,我挑了这几件,风格和场合都对得上:\n\n" +
+        "第一件垂坠感好、显利落;配第二件的直筒裤不挑腿型。想看细节点卡片,我再给你讲。",
+      // 出字前 1.8 秒静默,模拟工具轮 —— tool_running 提示只在这段能看到
+      delayMs: 1800,
+      earlyEvents: [{ type: "tool_running", label: "正在挑选商品" }],
+      events: [
+        {
+          type: "product_cards",
+          products: [
+            { id: "mock-1", title: "醋酸缎面吊带连衣裙", price: "¥459", cover: "/placeholder/dress.svg", reason: "recommend" },
+            { id: "mock-2", title: "水洗棉宽松直筒长裤", price: "¥329", cover: "/placeholder/pants.svg", reason: "outfit" },
+            { id: "mock-6", title: "细羊毛圆领针织衫", price: "¥429", cover: "", reason: "outfit" },
+          ],
+        },
+      ],
+    };
+  }
 
   if (/码|尺寸|尺码|size|穿多大|身高|体重|胸围|腰围|臀围/.test(m)) {
     return {

@@ -17,12 +17,14 @@ import { ChatInput } from "@/components/ui/ChatInput";
 import { Button } from "@/components/ui/button";
 import { MessageBubble } from "@/components/ui/MessageBubble";
 import { useKefuStore } from "@/stores/kefuStore";
+import type { KefuMsg } from "@/stores/kefuStore";
 import { siteConfig } from "@/site.config";
 import { streamKefuReply } from "@/lib/kefu-client";
 import { shouldRenderSizeTable, normalizeShapeSpec, FIELD_LABEL } from "@/lib/kefu/size-spec";
 import type { Product } from "@/lib/types";
 import { KefuProductSheet } from "./KefuProductSheet";
 import { FitVisualizer } from "./FitVisualizer";
+import { ProductCardsRow } from "./ProductCardsRow";
 
 export function KefuChat({ products }: { products: Product[] }) {
   const currentProductId = useKefuStore((s) => s.currentProductId);
@@ -97,6 +99,11 @@ export function KefuChat({ products }: { products: Product[] }) {
     if (!overrideText) clearDraft();
     setSending(true);
 
+    // 工具轮提示的清除收口在这一个函数里(照小程序端的做法):正文到达/done/error
+    // 全走这里,顺手清 label。按状态逐分支清容易漏,按出口收口不会。
+    const updateAssistant = (patch: (m: KefuMsg) => Partial<KefuMsg>) =>
+      patchMessage(assistantId, (m) => ({ toolRunningLabel: undefined, ...patch(m) }));
+
     await streamKefuReply(
       {
         message: text,
@@ -109,8 +116,9 @@ export function KefuChat({ products }: { products: Product[] }) {
         onSession: (id) => {
           if (!useKefuStore.getState().sessionId) setSessionId(id);
         },
-        // content 是全量,直接覆盖(不是 SSE 的增量 delta)
-        onContent: (content) => patchMessage(assistantId, () => ({ content })),
+        // content 是全量,直接覆盖(不是 SSE 的增量 delta)。
+        // 真流式(kefu 08-03)下 content 还可能变短/清空重来,全量覆盖天然无感
+        onContent: (content) => updateAssistant(() => ({ content })),
         onEscalated: () =>
           pushMessage({
             id: `sys-${Date.now()}`,
@@ -126,13 +134,18 @@ export function KefuChat({ products }: { products: Product[] }) {
             useKefuStore.getState().selectedProductIds[0];
           if (pid) patchMessage(assistantId, () => ({ fitVisualizerProductId: pid }));
         },
-        onDone: () => patchMessage(assistantId, () => ({ streaming: false })),
+        // 卡片走事件通道,挂在气泡下;不清 label(工具轮可能还在继续)
+        onProductCards: (cards) =>
+          patchMessage(assistantId, (m) => ({ cards: [...(m.cards ?? []), ...cards] })),
+        onToolRunning: (label) => patchMessage(assistantId, () => ({ toolRunningLabel: label })),
+        onDone: () => updateAssistant(() => ({ streaming: false })),
         onError: (msg) =>
-          patchMessage(assistantId, () => ({
-            content: `⚠️ ${msg}`,
-            streaming: false,
-            error: true,
-          })),
+          updateAssistant((m) =>
+            m.content
+              ? // 屏上已有半截正文:保留 + 追加,不整段抹掉(与 kefu 服务端超时收场同构)
+                { content: `${m.content}\n\n(${msg})`, streaming: false }
+              : { content: `⚠️ ${msg}`, streaming: false, error: true },
+          ),
       },
     );
 
@@ -232,6 +245,12 @@ export function KefuChat({ products }: { products: Product[] }) {
               return (
                 <div key={m.id}>
                   <MessageBubble msg={m} personaName={siteConfig.personaName} />
+                  {m.cards && m.cards.length > 0 && (
+                    <div className="mb-3 ml-4 mr-4 max-w-md">
+                      {/* 点卡片开半屏详情;卡 id 不在本页商品列表里时 detailProduct 落 null,自然无事发生 */}
+                      <ProductCardsRow cards={m.cards} onOpen={setDetailId} />
+                    </div>
+                  )}
                   {fitSpec && (
                     <div className="mb-3 ml-4 mr-4 max-w-md">
                       <FitVisualizer
