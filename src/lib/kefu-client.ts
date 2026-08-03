@@ -13,11 +13,22 @@
 //   - content 是**全量**(已生成部分全量返回),不是增量 delta → 直接覆盖,不要拼接
 //   - fit_visualizer 事件**不带 product_id** → 回落到「当前正在看的那件」
 
+/** cn-kefu store.ts 的 ProductCard,逐字对齐(reason 2026-08-01 加,可选) */
+export interface KefuProductCard {
+  id: string;
+  title: string;
+  price: string;
+  cover: string;
+  /** 这批卡是哪个工具发的:outfit=搭配推荐,recommend=场景/类目推荐。读不到按 undefined 处理 */
+  reason?: "outfit" | "recommend";
+}
+
 /** cn-kefu store.ts 的 JobEvent,逐字对齐 */
 type KefuEvent =
   | { type: "escalated" }
   | { type: "fit_visualizer" }
-  | { type: "product_cards"; products: unknown[] };
+  | { type: "product_cards"; products: unknown[] }
+  | { type: "tool_running"; label: string };
 
 interface ReplyPayload {
   status: string;
@@ -30,8 +41,7 @@ export interface KefuSendRequest {
   message: string;
   sessionId: string | null;
   productId: string | null;
-  /** ⚠️ cn-kefu 侧尚未支持这个参数(见 docs 未决 I),当前会被忽略。
-   *  后端补上 selected_product_ids 后本字段自动生效,前端不用改。 */
+  /** 推荐页心选清单,cn-kefu 注入「客人已选中」上下文(07-31 起已支持,上限 24 个) */
   selectedProductIds: string[];
 }
 
@@ -41,8 +51,25 @@ export interface KefuStreamCallbacks {
   onContent: (content: string) => void;
   onEscalated: () => void;
   onFitVisualizer: () => void;
+  /** AI 推荐的商品卡。⚠️ 走 events 通道,不在 content 正文里。
+   *  可选:老站点不实现也能编译(与「忽略未知事件」同一条纪律) */
+  onProductCards?: (products: KefuProductCard[]) => void;
+  /** 工具轮状态提示(label 是服务端代码文案,≤12 汉字)。
+   *  渲染契约:pending 且 content 为空时显示最新一条;content 一有字或到终态就清;不落历史 */
+  onToolRunning?: (label: string) => void;
   onDone: () => void;
   onError: (message: string) => void;
+}
+
+/** 宽容解析:上游字段缺损时丢弃单张卡,不让整轮渲染崩掉 */
+function parseCards(products: unknown[]): KefuProductCard[] {
+  return products.filter(
+    (p): p is KefuProductCard =>
+      typeof p === "object" &&
+      p !== null &&
+      typeof (p as { id?: unknown }).id === "string" &&
+      typeof (p as { title?: unknown }).title === "string",
+  );
 }
 
 /** 稳定访客标识:cn-kefu 将来按人限流用(当前忽略,提前带上,届时自动生效)。
@@ -136,7 +163,9 @@ export async function streamKefuReply(
       seenEvents.add(key);
       if (ev.type === "escalated") cb.onEscalated();
       else if (ev.type === "fit_visualizer") cb.onFitVisualizer();
-      // product_cards 等其它 type 暂不渲染 —— 契约纪律:忽略未知,别抛错
+      else if (ev.type === "product_cards") cb.onProductCards?.(parseCards(ev.products));
+      else if (ev.type === "tool_running") cb.onToolRunning?.(ev.label);
+      // 其它 type 不认识就跳过 —— 契约纪律:忽略未知,别抛错
     }
 
     if (payload.status === "done") {
