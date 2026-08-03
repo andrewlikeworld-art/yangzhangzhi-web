@@ -34,8 +34,12 @@ pnpm build        # 生产构建(standalone,给容器用)
 ```
 
 - 浏览器**只**打本服务的 `/api/kefu/*`;cn-kefu 的地址和密钥永不下发到前端。
-- 传输是 cn-kefu 的**发/取轮询伪流式**,不是 SSE:
-  `POST /api/chat` 立即返回 `message_id` → `GET /api/reply` 每秒轮询取已生成部分。
+- 传输是 cn-kefu 的**发/取轮询**,不是 SSE:
+  `POST /api/chat` 立即返回 `message_id` → `GET /api/reply` 300ms 轮询取已生成部分。
+  (kefu 2026-08-03 起对 web 是**真流式**:content 生成期间就增长,且可能变短清空重来
+  ——所以必须全量覆盖渲染,绝不增量拼接。)
+- 客户端兜底 60 秒墙钟,🔴 绑死在 kefu 服务端整轮预算 40 秒上(必须大于它);
+  两边谁要调,先在 `~/Documents/web-kefu-中转站` 信箱里说一声。
 - 全部细节封在 [src/lib/kefu-client.ts](src/lib/kefu-client.ts) 一个文件里。
 
 ### 两个容易踩的语义差异
@@ -104,8 +108,8 @@ mock 商品刻意造了两条渲染路径:带 `size_spec` 的会渲染尺码图 
 
 ## 已知待办
 
-- 访客身份:cn-kefu 的会话身份建在微信 openid 上,Web 访客没有 →
-  历史续聊暂不可用,内容安全过检通道也要换(`msgSecCheck` 要求小程序 openid)。
-  见讨论文档未决 B,**这是上线前必须解决的合规项**。
-- `selected_product_ids`:前端已在传,cn-kefu 侧尚未支持,当前被忽略(未决 I)。
+- 访客身份:cn-kefu 的会话身份建在微信 openid 上,Web 访客没有 → 历史续聊暂不可用。
+  ~~内容安全过检通道也要换~~ **2026-08-03 已与各方对齐:web 端不配 msgSecCheck**
+  (微信协议要求真实 openid,web 访客结构性没有;这是已定取舍,不是遗漏,别再当待办补)。
+- ~~`selected_product_ids`:cn-kefu 侧尚未支持~~ **07-31 起已支持**(注入「客人已选中」上下文)。
 - ICP 备案进行中,备案完成后才能绑 `yangzhangzhi.com`。
