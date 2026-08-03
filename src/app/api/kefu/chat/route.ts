@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createMockJob } from "@/lib/mock-kefu";
+import { kefuAuthHeader } from "@/lib/kefu-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,9 +49,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         ...(visitorId ? { "X-Visitor-Id": visitorId } : {}),
-        ...(process.env.KEFU_SHARED_KEY
-          ? { Authorization: `Bearer ${process.env.KEFU_SHARED_KEY}` }
-          : {}),
+        ...kefuAuthHeader(),
       },
       body: JSON.stringify({
         message,

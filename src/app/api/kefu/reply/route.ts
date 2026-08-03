@@ -1,6 +1,7 @@
 // BFF:轮询取回复。见 chat/route.ts 顶部的部署与鉴权说明。
 import { NextRequest, NextResponse } from "next/server";
 import { readMockJob } from "@/lib/mock-kefu";
+import { kefuAuthHeader } from "@/lib/kefu-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,9 +23,7 @@ export async function GET(req: NextRequest) {
     const res = await fetch(
       `${base}/api/reply?message_id=${encodeURIComponent(messageId)}`,
       {
-        headers: process.env.KEFU_SHARED_KEY
-          ? { Authorization: `Bearer ${process.env.KEFU_SHARED_KEY}` }
-          : {},
+        headers: kefuAuthHeader(),
         signal: AbortSignal.timeout(10_000),
       },
     );

@@ -8,6 +8,7 @@
 // 拍板后只改这个函数,组件和页面不用动。
 import type { Product } from "./types";
 import { mockProducts } from "@/data/mock-products";
+import { kefuAuthHeader } from "./kefu-auth";
 
 export async function getProducts(): Promise<Product[]> {
   const base = process.env.KEFU_API_BASE;
@@ -17,9 +18,7 @@ export async function getProducts(): Promise<Product[]> {
   // 让页面永远有东西可看(顾客站不该因为商品接口挂了就白屏)。
   try {
     const res = await fetch(`${base}/api/products`, {
-      headers: process.env.KEFU_SHARED_KEY
-        ? { Authorization: `Bearer ${process.env.KEFU_SHARED_KEY}` }
-        : {},
+      headers: kefuAuthHeader(),
       signal: AbortSignal.timeout(8_000),
       // 商品变动不频繁,60s 缓存与 cn-kefu 的 shop.ts 缓存窗口对齐
       next: { revalidate: 60 },
