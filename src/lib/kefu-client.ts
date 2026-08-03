@@ -93,9 +93,15 @@ function getVisitorId(): string {
   }
 }
 
-const POLL_INTERVAL_MS = 800;
-/** 轮询上限:90 秒。超了就报错收尾,不让气泡永远转圈 */
-const POLL_TIMEOUT_MS = 90_000;
+/** 300ms:kefu 08-03 真流式上线后,轮询间隔直接决定出字观感。
+ *  /api/reply 永不限流(kefu 契约,重申过两次),单实例下轮询读内存,300ms 拿得到收益。
+ *  与小程序端的 300ms 看齐。 */
+const POLL_INTERVAL_MS = 300;
+/** 客户端兜底:从拿到 message_id 起算墙钟 60 秒(2026-08-03 与 kefu 信箱对齐)。
+ *  🔴 必须大于 kefu 服务端整轮预算 TURN_BUDGET_MS=40 秒,否则顾客看到的是这边的
+ *  兜底话术而不是 kefu 那句具体的。服务端要调预算会先在信箱说,这边跟着改。
+ *  刻意用墙钟不用轮询次数——间隔怎么调,兜底都还是 60 秒。 */
+const POLL_TIMEOUT_MS = 60_000;
 
 export async function streamKefuReply(
   req: KefuSendRequest,
