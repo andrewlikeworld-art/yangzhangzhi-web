@@ -20,10 +20,18 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // 🔴 缓存三防线(2026-08-04,web 渠道生成全冻结的教训,复盘见中转站当日条):
+    // cn-kefu 公网域名前有 CDN,而其 /api/reply 曾无 Cache-Control 有 ETag →
+    // CDN 把首份 {status:"pending"} 按 URL 缓存,轮询永远读到它,顾客侧表现为全冻。
+    // kefu 侧已修(no-store + 关 etag),但按「两边各守一道」的约定,这里独立自保:
+    //   1. _t 时间戳:每次轮询 URL 唯一,任何按 URL 键控的缓存都必然 MISS(kefu 忽略多余参数)
+    //   2. cache:"no-store":Next 14 的 fetch 默认会缓存,force-dynamic 之外再显式声明一次
+    //   3. 响应头 no-store:本 BFF 自己的响应也不许任何中间层存
     const res = await fetch(
-      `${base}/api/reply?message_id=${encodeURIComponent(messageId)}`,
+      `${base}/api/reply?message_id=${encodeURIComponent(messageId)}&_t=${Date.now()}`,
       {
         headers: kefuAuthHeader(),
+        cache: "no-store",
         signal: AbortSignal.timeout(10_000),
       },
     );
@@ -34,7 +42,7 @@ export async function GET(req: NextRequest) {
         { status: res.status === 404 ? 404 : 502 },
       );
     }
-    return NextResponse.json(payload);
+    return NextResponse.json(payload, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     console.error("[kefu/reply] 上游请求失败:", err);
     return NextResponse.json({ error: "取回复失败" }, { status: 502 });
