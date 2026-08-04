@@ -11,8 +11,8 @@ import type { Product } from "./types";
 export interface Category {
   id: string;
   label: string;
-  /** 命中任一关键词即归入本类;顺序即优先级,先命中先归类 */
-  keywords: string[];
+  /** 关键词兜底通道才有;真品类通道下为空(2026-08-04 shop 直连后品类以商家类目为准) */
+  keywords?: string[];
 }
 
 /** 关键词按「越具体越靠前」排:先判"半身裙"再判"裙",避免连衣裙被归进半裙 */
@@ -25,17 +25,29 @@ export const CATEGORIES: Category[] = [
   { id: "outer", label: "外套", keywords: ["外套", "西装", "夹克", "风衣", "大衣"] },
 ];
 
-/** 单件商品归类。返回 null = 关键词都没命中,只出现在「全部」里 */
+/** 单件商品归类。**商家真品类优先**(shop 直连字段,2026-08-04 拍板以它为准),
+ *  没有才退回标题关键词猜(kefu/mock 过渡通道)。返回 null = 只出现在「全部」里 */
 export function categoryOf(product: Product): string | null {
+  if (product.category) return product.category;
   const t = product.title;
   for (const c of CATEGORIES) {
-    if (c.keywords.some((k) => t.includes(k))) return c.id;
+    if (c.keywords?.some((k) => t.includes(k))) return c.id;
   }
   return null;
 }
 
-/** 只返回**真的有商品**的分类。空分类不该出现在导航里——点进去一片空白比没有更糟 */
+/** 只返回**真的有商品**的分类。空分类不该出现在导航里——点进去一片空白比没有更糟。
+ *  真品类通道:按商家填的原值分组(shop 说按字符串用,历史别名如「半身裙」各算各组);
+ *  兜底通道:老的关键词六类。 */
 export function activeCategories(products: Product[]): Array<Category & { count: number }> {
+  const real = products.some((p) => p.category);
+  if (real) {
+    const counts = new Map<string, number>();
+    for (const p of products) {
+      if (p.category) counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([value, count]) => ({ id: value, label: value, count }));
+  }
   return CATEGORIES.map((c) => ({
     ...c,
     count: products.filter((p) => categoryOf(p) === c.id).length,

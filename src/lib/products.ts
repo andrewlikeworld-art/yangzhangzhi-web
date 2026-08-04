@@ -9,8 +9,17 @@
 import type { Product } from "./types";
 import { mockProducts } from "@/data/mock-products";
 import { kefuAuthHeader } from "./kefu-auth";
+import { getShopProducts, shopCatalogEnabled } from "./shop-catalog";
 
+// 数据源优先级(2026-08-04 架构决策,docs/data-channel-discussion.md):
+//   shop 直连接口(配了 SHOP_CATALOG_* 才启用)→ kefu /api/products(迁移过渡)→ mock。
+// shop 上游抖动时回落 kefu 而不是白屏——迁移期两条通道并存正是为了这个。
 export async function getProducts(): Promise<Product[]> {
+  if (shopCatalogEnabled()) {
+    const fromShop = await getShopProducts();
+    if (fromShop) return fromShop;
+    console.warn("[products] shop 直连失败,回落 kefu 通道");
+  }
   const base = process.env.KEFU_API_BASE;
   if (!base) return mockProducts;
 

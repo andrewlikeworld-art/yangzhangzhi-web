@@ -22,4 +22,24 @@ export interface Product {
   size_spec: unknown;
   shape_spec: unknown;
   sort_order: number;
+
+  /* ── 2026-08-04 起,shop 直连接口才有的字段(kefu/mock 通道下为空)── */
+  /** 商家后台填的真品类(上衣/裤装/裙装/连衣裙/套装/外套,历史数据有别名),按字符串用 */
+  category?: string | null;
+  /** 颜色名数组。shop 侧已按其口径过滤掉隐藏 SKU 的颜色,web 直接渲染即可 */
+  colors?: string[];
+}
+
+/** 穿搭灵感(shop /web/catalog?scope=inspirations,形状照库) */
+export interface Look {
+  id: string;
+  title: string;
+  /** 眉题(卡片上方那行小字) */
+  eyebrow: string | null;
+  desc: string | null;
+  cover: string | null;
+  /** ≤6 张,3:4 */
+  images: string[];
+  /** 关联商品 id,保序 */
+  productIds: string[];
 }

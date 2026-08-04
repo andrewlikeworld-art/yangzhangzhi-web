@@ -588,9 +588,16 @@ function ShelfCard({
         <p className="u-numeral mt-1 text-[0.875rem] font-semibold leading-none text-ink">
           {p.price ?? ""}
         </p>
-        {/* 参考图此处是色点;无颜色数据,放真实的面料字段占同一行位 */}
-        {p.fabric && (
-          <p className="mt-1 truncate text-[0.6875rem] text-muted-foreground">{p.fabric}</p>
+        {/* 参考图此处是色点行。颜色名不猜色值(「孔雀蓝」映不准),用文字呈现;
+            shop 通道已按其口径滤掉隐藏 SKU 的颜色。没颜色数据才退回面料行 */}
+        {p.colors && p.colors.length > 0 ? (
+          <p className="mt-1 truncate text-[0.6875rem] text-muted-foreground">
+            {p.colors.join(" / ")}
+          </p>
+        ) : (
+          p.fabric && (
+            <p className="mt-1 truncate text-[0.6875rem] text-muted-foreground">{p.fabric}</p>
+          )
         )}
       </div>
     </article>
