@@ -6,6 +6,11 @@ import { kefuAuthHeader } from "@/lib/kefu-auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/** 轮询响应一律不许被任何中间层缓存——**错误响应也不行**:
+ *  上游一次抖动返回的 404/502 若被缓存住,顾客会一直看到"取回复失败",
+ *  与这次全冻结是同一类事故(2026-08-04 验证时发现:此前只有成功路径带了这个头)。 */
+const NO_STORE = { "Cache-Control": "no-store" } as const;
+
 export async function GET(req: NextRequest) {
   const messageId = req.nextUrl.searchParams.get("message_id");
   if (!messageId) {
@@ -39,12 +44,12 @@ export async function GET(req: NextRequest) {
     if (!res.ok) {
       return NextResponse.json(
         { error: "取回复失败" },
-        { status: res.status === 404 ? 404 : 502 },
+        { status: res.status === 404 ? 404 : 502, headers: NO_STORE },
       );
     }
-    return NextResponse.json(payload, { headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json(payload, { headers: NO_STORE });
   } catch (err) {
     console.error("[kefu/reply] 上游请求失败:", err);
-    return NextResponse.json({ error: "取回复失败" }, { status: 502 });
+    return NextResponse.json({ error: "取回复失败" }, { status: 502, headers: NO_STORE });
   }
 }
