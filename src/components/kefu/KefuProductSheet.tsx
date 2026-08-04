@@ -3,7 +3,7 @@
 // 商品详情悬浮层 v2(2026-07-29 第三轮:半屏横滑面板 → 居中悬浮窗):
 // 点商品图弹出,展示全部图片 + 详情(价格/面料/尺码表/商品详情),纵向滚动;
 // 点单张图可再放大全屏。不跳页面,推荐区和咨询页共用;头部心形可选中/取消。
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart, ShoppingBag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { shouldRenderSizeTable, normalizeShapeSpec } from "@/lib/kefu/size-spec";
@@ -23,6 +23,22 @@ export function KefuProductSheet({
   onClose: () => void;
 }) {
   const [fullscreenSrc, setFullscreenSrc] = useState<string | null>(null);
+
+  // 弹层开着时锁住背景滚动:①滚轮滚到弹层外会把底下页面滚走,关掉后位置乱了
+  // ②Esc 关闭是浮层的基本礼貌
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
   const images =
     product.images && product.images.length > 0
       ? product.images
@@ -32,7 +48,10 @@ export function KefuProductSheet({
 
   return (
     <>
-      <div className="absolute inset-0 z-40 flex items-center justify-center p-3 md:p-8">
+      {/* 🔴 必须 fixed 不能 absolute(2026-08-04 实测 bug):absolute 锚在整页文档上,
+          首页改成可滚动文档后,顾客滚到下面点商品,弹层落在文档中部——得往回滚才看得见。
+          fixed 锚视口,点哪儿都弹在眼前。z-50 盖过吸顶导航(30)和客服挂件(40)。 */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-8">
         {/* 遮罩:点空白处关闭 */}
         <button
           type="button"
@@ -40,7 +59,7 @@ export function KefuProductSheet({
           onClick={onClose}
           className="absolute inset-0 cursor-default bg-black/45"
         />
-        <div className="relative z-10 flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-background shadow-2xl">
+        <div className="relative z-10 flex max-h-[85dvh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-background shadow-2xl">
           {/* 头:标题 + 心 + 关闭 */}
           <div className="flex shrink-0 items-center gap-1 border-b py-1.5 pl-4 pr-1.5">
             <p className="min-w-0 flex-1 truncate text-sm font-medium">{product.title}</p>

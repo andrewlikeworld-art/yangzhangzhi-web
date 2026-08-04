@@ -99,15 +99,17 @@ function toProduct(raw: unknown, i: number): Product | null {
     id,
     title,
     price: formatPrice(r.priceMinFen, r.priceMaxFen),
-    // shop 初版清单没有面料与详情文案字段(已在验证回信里提);缺就空,卡片行自动让位给颜色
-    fabric: null,
+    // 面料库字段名是 material 不是 fabric(shop 08-05 回信明确);detailText 同批加。
+    // 两者都要等 shop 重传函数才有值——在此之前 str() 拿到 undefined/"" 自然落 null,
+    // 上线后这里自动吃到,不用再改
+    fabric: str(r.material),
     // sizeChart 实测形态(2026-08-04 实连):[{sizeName, measures:{裤长:101.5,…}}]——
     // 中文部位键,和 web 的 SizeSpec(英文标准键)不同形。塞给 size_spec 会被
     // shouldRenderSizeTable 拒掉 → 详情页尺码表整个消失。所以先诚实降级:
     // 转成可读文本走 size_chart 原文通道,顾客照样看得到全部数字。
     // TODO(discussion 文档有账):移植 kefu 的中文部位→标准键映射,让试穿组件也能吃
     size_chart: sizeChartText(r.sizeChart),
-    detail_text: null,
+    detail_text: str(r.detailText),
     image_url: str(r.cover),
     images: strArr(r.images),
     size_spec: null,
