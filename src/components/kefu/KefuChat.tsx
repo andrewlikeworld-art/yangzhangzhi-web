@@ -20,6 +20,7 @@ import { MessageBubble } from "@/components/ui/MessageBubble";
 import { useKefuStore } from "@/stores/kefuStore";
 import type { KefuMsg } from "@/stores/kefuStore";
 import { siteConfig } from "@/site.config";
+import { SCENARIOS } from "@/lib/catalog";
 import { streamKefuReply } from "@/lib/kefu-client";
 import { shouldRenderSizeTable, normalizeShapeSpec, FIELD_LABEL } from "@/lib/kefu/size-spec";
 import type { Product } from "@/lib/types";
@@ -209,10 +210,10 @@ export function KefuChat({
                   <img
                     src={p.image_url}
                     alt={p.title}
-                    className="aspect-[3/4] w-full border border-hairline object-cover"
+                    className="aspect-[3/4] w-full rounded-lg bg-surface object-cover"
                   />
                 ) : (
-                  <div className="flex aspect-[3/4] w-full items-center justify-center border border-hairline bg-muted text-muted-foreground">
+                  <div className="flex aspect-[3/4] w-full items-center justify-center rounded-lg bg-muted text-muted-foreground">
                     <ShoppingBag className="size-5 opacity-60" />
                   </div>
                 )}
@@ -244,9 +245,27 @@ export function KefuChat({
       {/* 消息 */}
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <div className="mx-auto max-w-[var(--measure-prose)] px-6 py-16 text-center">
-            <ShoppingBag className="mx-auto mb-3 size-8 text-[var(--editorial-red)] opacity-50" />
-            <p className="text-sm text-muted-foreground">{siteConfig.consultEmptyHint}</p>
+          // 空状态(参考图挂件式):问候语 + 建议话题 chips,点了直接发出
+          <div className="mx-auto max-w-[var(--measure-prose)] px-5 py-10">
+            <p className="text-[0.9375rem] font-medium text-ink">
+              嗨,我是{siteConfig.shopName}的 AI 顾问
+            </p>
+            <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted-foreground">
+              {siteConfig.consultEmptyHint}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {SCENARIOS.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => void send(s.prompt)}
+                  className="rounded-full border border-hairline px-3.5 py-2 text-[0.75rem] text-ink transition-colors hover:bg-surface"
+                  style={{ transitionDuration: "var(--dur-fast)" }}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="py-2">

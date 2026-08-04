@@ -9,13 +9,13 @@ import { cn } from "@/lib/utils";
 import type { KefuMsg } from "@/stores/kefuStore";
 
 export function MessageBubble({ msg, personaName }: { msg: KefuMsg; personaName: string }) {
-  // 系统提示(转人工等):杂志的编者按做法——发丝线上下夹一行小字,不做胶囊
+  // 系统提示(转人工等):居中小胶囊,参考图挂件的系统行样式
   if (msg.role === "system") {
     return (
-      <div className="mx-auto my-3 flex max-w-[var(--measure-prose)] items-center gap-3 px-4">
-        <span className="h-px flex-1 bg-hairline" />
-        <span className="u-kicker shrink-0">{msg.content}</span>
-        <span className="h-px flex-1 bg-hairline" />
+      <div className="px-4 py-2 text-center">
+        <span className="rounded-full bg-surface px-3 py-1 text-[0.6875rem] text-muted-foreground">
+          {msg.content}
+        </span>
       </div>
     );
   }
@@ -23,8 +23,7 @@ export function MessageBubble({ msg, personaName }: { msg: KefuMsg; personaName:
   const isUser = msg.role === "user";
 
   return (
-    // 读行宽约束:桌面上气泡最宽只到 68ch。原先是 max-w-75%,在 1600px 宽屏上
-    // 一行能塞七八十个汉字,远超中文舒适行长(30~40 字),读起来要来回扫。
+    // 读行宽约束:整页模式下桌面气泡最宽 68ch(中文舒适行长);挂件里容器本身就窄
     <div
       className={cn(
         "mx-auto flex max-w-[var(--measure-prose)] px-4 py-2",
@@ -35,12 +34,12 @@ export function MessageBubble({ msg, personaName }: { msg: KefuMsg; personaName:
         {!isUser && <p className="u-kicker mb-1.5">{personaName}</p>}
         <div
           className={cn(
-            "px-4 py-2.5 text-[0.9375rem] leading-relaxed",
-            // 配方零圆角。顾客侧用墨底反白,客服侧用发丝线框——靠形状而非颜色区分
+            // 参考图挂件的气泡:圆角,顾客黑底白字,客服浅灰底无边框
+            "rounded-2xl px-4 py-2.5 text-[0.9375rem] leading-relaxed",
             isUser
-              ? "bg-[var(--bubble-user)] text-[var(--bubble-user-fg)]"
-              : "border border-hairline bg-card text-card-foreground",
-            msg.error && "border-destructive text-destructive",
+              ? "rounded-br-md bg-[var(--bubble-user)] text-[var(--bubble-user-fg)]"
+              : "rounded-bl-md bg-surface text-card-foreground",
+            msg.error && "text-destructive",
           )}
         >
           {isUser ? (

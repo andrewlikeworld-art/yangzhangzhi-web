@@ -3,37 +3,29 @@
 
 /* ══════════════════════════════════════════════════════════════════
    杨张治服饰 · 设计系统
-   配方:monocle-magazine(web-design-engineer 25 套有出处配方之一)
-   锚点:Monocle 杂志 / Cereal —— 国际化、考究、杂志级的
-        「引题 → 标题 → 副题」三层结构
+   theme: studied-DNA(source: 用户参考图「C-STYLE」电商首页,2026-08-04)
 
-   为什么是这一套:品牌的商品图是日本街拍实景(电话亭、石墙、自然光、
-   低饱和),而 Monocle 配方的配图指南原文就是「东京后街黄昏、暖调、
-   轻微胶片颗粒、中景一个人物」。素材和配方是同源的,不是硬套。
+   参考图的视觉语言:白底 · 圆角卡(12~20px)· 胶囊按钮 · 悬浮软阴影 ·
+   衬线只出现在 Hero 大标题(一行常规 + 一行加粗),其余全部无衬线 ·
+   商品图垫浅灰暖底 · 黑色为唯一主色,红只留给心选/角标这类功能点。
 
-   ⚠️ 对配方做了一处**明示**的中文本地化改动(配方禁止"悄悄偏离"):
-   原方要求正文也用衬线体。但中文 16px 宋体在屏幕上比黑体难读,国内
-   编辑类网站普遍是「标题宋体 + 正文黑体」。故:宋体只用于显示层,
-   正文与商品标题走系统黑体。理由详见 fonts.css 顶部。
+   用户要求:版式/结构/卡片样式/间距对齐参考图;文字与功能用本站真实内容。
    ══════════════════════════════════════════════════════════════════ */
 
 @theme inline {
-  /* 显示层:拉丁 Newsreader + 中文思源宋体。两者都自托管,零第三方请求 */
+  /* 显示层衬线:拉丁 Newsreader + 中文思源宋体,只给 Hero 大标题用 */
   --font-serif: "Newsreader", "Noto Serif SC", Georgia, "Songti SC", serif;
-  /* 正文/标签层:系统精密无衬线(Mac 是 SF Pro、Win 是 Segoe UI——
-     都是 Monocle 要的 "precision grotesk" 那一类) */
   --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
     "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
 
-  /* ⚠️ 配方色必须在这里注册,组件里的 bg-ink / border-hairline 之类才解析得了。
-     只写 :root 是不够的——Tailwind v4 只认 @theme 里的 --color-* 前缀。
-     2026-08-04 实测:漏注册时 bg-ink 静默失效,公告条变成"奶油底+奶油字"整条隐形,
-     Hero 的实心按钮也没了底色。**不报错、只是消失**,是最难查的那类。 */
+  /* ⚠️ 自定义色必须在 @theme 注册,bg-ink / border-hairline 才解析得了。
+     只写 :root 会静默失效(不报错、只是消失)——2026-08-04 实测踩过 */
   --color-ink: var(--ink);
   --color-paper: var(--paper);
+  --color-surface: var(--surface);
   --color-hairline: var(--hairline);
+  --color-graphite: var(--graphite);
   --color-editorial-red: var(--editorial-red);
-  --color-olive: var(--olive);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -49,72 +41,58 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  /* 配方:杂志页面不做圆角。全部归零,组件里现有的 rounded-* 类自动跟着变方,
-     不用逐个改。rounded-full 刻意不覆盖——心选/发送那种功能圆钮仍需要正圆。 */
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
+
+  /* 参考图是圆角体系:卡 12~16,横幅 16~20,按钮全胶囊 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 }
 
 :root {
-  /* ── 配方色板(逐值照抄,不增不减)──
-     Monocle 明令「只有一个强调色」。编辑红是它的签名,橄榄绿只作次要标记。 */
-  --paper: #f2efe7; /* 奶油纸 */
-  --ink: #1a1a1a;
-  --editorial-red: #c7322e; /* 唯一强调色:引题、序号、选中态 */
-  --olive: #5e6347; /* 次要:副题、静默标记 */
-  --hairline: #c8c2b0; /* 发丝线——本配方唯一的装饰手段 */
-  --graphite: #6b6862; /* 次级文字 */
+  /* ── 参考图色板 ── */
+  --paper: #ffffff;
+  --surface: #f5f4f1; /* 商品图垫底的浅灰暖底 */
+  --hero-ground: #e7e2da; /* Hero 的米灰底 */
+  --ink: #141414;
+  --graphite: #6f6d69;
+  --hairline: #e9e7e2;
+  --editorial-red: #c7322e; /* 只给心选/推荐角标,页面主色是黑 */
 
-  /* ── 语义映射(沿用 shadcn 命名,组件不用改就能换装)── */
+  /* ── 语义映射(shadcn 命名,组件免改换装)── */
   --background: var(--paper);
   --foreground: var(--ink);
-  --card: #f7f5ef;
+  --card: #ffffff;
   --card-foreground: var(--ink);
   --primary: var(--ink);
-  --primary-foreground: var(--paper);
-  --muted: #e7e3d8;
+  --primary-foreground: #ffffff;
+  --muted: var(--surface);
   --muted-foreground: var(--graphite);
-  --accent: #e7e3d8;
+  --accent: #eceae5;
   --accent-foreground: var(--ink);
-  --destructive: var(--editorial-red);
+  --destructive: #b3261e;
   --border: var(--hairline);
   --input: var(--hairline);
-  --ring: var(--editorial-red);
-  --radius: 0px; /* 配方:杂志页面不做圆角 */
+  --ring: var(--ink);
+  --radius: 12px;
 
-  /* 聊天气泡 */
+  /* 聊天气泡:顾客黑底白字,客服浅灰底 */
   --bubble-user: var(--ink);
-  --bubble-user-fg: var(--paper);
+  --bubble-user-fg: #ffffff;
 
-  /* ── 间距梯(配方给的值:4/8/16/24/32/48/96)── */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 16px;
-  --space-4: 24px;
-  --space-5: 32px;
-  --space-6: 48px;
-  --space-7: 96px;
-
-  /* ── 字距 ──
-     0.08em 是配方给引题/标签的值;字标那个 0.42em 是从商品图水印上量的,
-     是品牌既有资产 */
-  --track-kicker: 0.08em;
-  --track-wordmark: 0.42em;
+  /* 字距 */
+  --track-wordmark: 0.42em; /* 品牌字标,从商品图水印量的,别调 */
   --track-label: 0.26em;
-  /* 大号衬线标题要收紧字距才有杂志感 */
+  --track-kicker: 0.08em;
   --track-display: -0.02em;
 
-  /* ── 动效:配方要求 minimal。翻页式淡入 + 头图缓慢推进,仅此 ── */
+  /* 动效 */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 120ms;
   --dur-base: 240ms;
-  --dur-slow: 600ms;
 
-  --measure-page: 1560px;
+  /* 版心:参考图内容区约 1200~1300 */
+  --measure-page: 1280px;
   --measure-prose: 68ch;
 }
 
@@ -125,23 +103,19 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
-  /* 焦点环必须立刻可见,且不做动画 */
   :focus-visible {
-    outline: 2px solid var(--editorial-red);
+    outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
 }
 
 @layer utilities {
-  /* 真实可视高度:移动端键盘弹起时 100dvh 在部分浏览器不收缩,
-     由 layout 里的内联脚本把 visualViewport.height 写进 --app-height。
-     ⚠️ 只有咨询页(app 形态)用它;落地页走正常文档流滚动。 */
+  /* 真实可视高度:只有咨询挂件全屏态用;首页走正常文档流 */
   .h-app {
     height: var(--app-height, 100dvh);
   }
 
-  /* 字标:超宽字距会在末字母右侧多留一份空,导致「看着没居中」。
-     负右边距补回来——光学居中,不是数学居中。 */
+  /* 字标:超宽字距在末字母右侧多留一份空,负右边距补回光学居中 */
   .u-wordmark {
     letter-spacing: var(--track-wordmark);
     margin-right: calc(var(--track-wordmark) * -1);
@@ -151,9 +125,7 @@
     margin-right: calc(var(--track-label) * -1);
   }
 
-  /* ── Monocle 三层结构 ──
-     配方签名动作:极小的红色引题 → 粗衬线标题 → 斜体衬线副题。
-     这三个类是整套设计的识别核心,不要各自为政地重写。 */
+  /* 小引题:参考图里是灰色小写间距字(SHOP BY CATEGORY 上方那类) */
   .u-kicker {
     font-family: var(--font-sans);
     font-size: 10px;
@@ -161,35 +133,15 @@
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: var(--track-kicker);
-    color: var(--editorial-red);
+    color: var(--graphite);
   }
-  .u-headline {
-    font-family: var(--font-serif);
-    font-weight: 600;
-    line-height: 1.08;
-    letter-spacing: var(--track-display);
-    color: var(--ink);
-    text-wrap: balance;
-  }
-  .u-dek {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-weight: 400;
-    line-height: 1.45;
-    color: var(--olive);
-    text-wrap: pretty;
-  }
-  /* 序号:配方的「Feature 04 — Lisbon」那种边栏小数字 */
+  /* 数字:表格数字对齐 */
   .u-numeral {
-    font-family: var(--font-serif);
     font-variant-numeric: tabular-nums;
-    color: var(--editorial-red);
   }
-  /* 命中区补足到 44px(WCAG),不改变视觉尺寸。
-     ⚠️ position 必须包在 :where() 里——它和 Tailwind 的 .absolute 同属 utilities 层、
-     特异性相同,写在后面就会把 .absolute 覆盖掉(2026-08-04 实测:心选按钮因此
-     从图片左上角掉到了图片下方)。:where() 特异性为 0,.absolute 稳赢;
-     而没有定位类的元素仍能拿到 relative。 */
+
+  /* 命中区补足 44px。⚠️ position 必须包 :where():
+     与 Tailwind .absolute 同层同特异性,裸写会把 absolute 覆盖掉(实测踩过) */
   :where(.u-hit) {
     position: relative;
   }
@@ -212,9 +164,7 @@
   }
 }
 
-/* AI 回复的 markdown 排版(react-markdown 输出的裸标签)。
-   刻意不引 @tailwindcss/typography —— 客服回复只有段落/列表/强调/表格几种,
-   自己写十几行比拖一个插件划算。 */
+/* AI 回复的 markdown 排版(react-markdown 输出的裸标签) */
 .prose-chat > :first-child {
   margin-top: 0;
 }
@@ -243,6 +193,7 @@
 }
 .prose-chat code {
   background: var(--muted);
+  border-radius: 4px;
   padding: 0.1em 0.3em;
   font-size: 0.9em;
 }

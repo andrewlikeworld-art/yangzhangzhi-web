@@ -39,12 +39,12 @@ export function ProductCardsRow({
                 <img
                   src={sizedImage(c.cover, CARD_IMG_WIDTH)}
                   alt={c.title}
-                  className="aspect-[3/4] w-full border border-hairline object-cover"
+                  className="aspect-[3/4] w-full rounded-lg bg-surface object-cover"
                   loading="lazy"
                   decoding="async"
                 />
               ) : (
-                <div className="flex aspect-[3/4] w-full items-center justify-center border border-hairline bg-muted text-muted-foreground">
+                <div className="flex aspect-[3/4] w-full items-center justify-center rounded-lg bg-muted text-muted-foreground">
                   <ShoppingBag className="size-5 opacity-60" />
                 </div>
               )}
