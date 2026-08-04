@@ -377,7 +377,9 @@ export function CategoryCircles({
           </button>
         }
       />
-      <div className="mt-6 flex gap-6 overflow-x-auto pb-2 md:gap-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* 参考图排版:圆环**均匀铺满整行**(两端对齐,剩余空间平摊),不是固定间距靠左。
+          手机上放不下时退回横滑。 */}
+      <div className="mt-6 flex gap-6 overflow-x-auto pb-2 md:justify-between md:gap-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {categories.map((c) => {
           // ⚠️ 用 categoryOf 而不是 keywords.some:后者不认优先级,会取错样图(实测)
           const sample = products.find((p) => p.image_url && categoryOf(p) === c.id);
@@ -387,7 +389,7 @@ export function CategoryCircles({
               key={c.id}
               type="button"
               onClick={() => onSelect(on ? null : c.id)}
-              className="w-20 shrink-0 text-center md:w-[5.5rem]"
+              className="w-20 shrink-0 text-center md:w-28"
             >
               <div
                 className={cn(
@@ -419,7 +421,7 @@ export function CategoryCircles({
         })}
 
         {/* 黑圆:参考图 SALE 位,装 AI 顾问 */}
-        <button type="button" onClick={onOpenChat} className="w-20 shrink-0 text-center md:w-[5.5rem]">
+        <button type="button" onClick={onOpenChat} className="w-20 shrink-0 text-center md:w-28">
           <div className="flex aspect-square w-full items-center justify-center rounded-full bg-ink">
             <span className="text-[0.6875rem] font-semibold tracking-[0.08em] text-white">
               AI 顾问
