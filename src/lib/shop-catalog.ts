@@ -58,6 +58,33 @@ function formatPrice(minFen: unknown, maxFen: unknown): string | null {
 }
 
 const str = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v : null);
+
+/** 颜色名清洗(仅展示层):商家把政策塞进了颜色值——实测有「白色【付款后不退不换】」
+ *  「红色(付款后不退不换)」。色点行只该是颜色;政策文案不属于这里,
+ *  且商家的政策表述在小程序详情页有完整呈现,web 不替它转述。已在信箱向 shop 报备。 */
+function cleanColor(name: string): string {
+  return name.replace(/[【((\[].*$/u, "").trim();
+}
+
+/** shop 的结构化尺码表 → 可读文本(「S/26:裤长 101.5 / 腰围 66 / 臀围 82.5」逐行)。
+ *  已是字符串就原样返回;形状不认识返回 null,详情页不渲染坏数据 */
+function sizeChartText(v: unknown): string | null {
+  if (typeof v === "string") return str(v);
+  if (!Array.isArray(v)) return null;
+  const lines: string[] = [];
+  for (const row of v) {
+    if (typeof row !== "object" || row === null) continue;
+    const r = row as Record<string, unknown>;
+    const name = str(r.sizeName);
+    const measures = r.measures;
+    if (!name || typeof measures !== "object" || measures === null) continue;
+    const parts = Object.entries(measures as Record<string, unknown>)
+      .filter(([, val]) => typeof val === "number" || typeof val === "string")
+      .map(([k, val]) => `${k} ${val}`);
+    if (parts.length > 0) lines.push(`${name}:${parts.join(" / ")}`);
+  }
+  return lines.length > 0 ? lines.join("\n") : null;
+}
 const strArr = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && !!x.trim()) : [];
 
@@ -74,17 +101,20 @@ function toProduct(raw: unknown, i: number): Product | null {
     price: formatPrice(r.priceMinFen, r.priceMaxFen),
     // shop 初版清单没有面料与详情文案字段(已在验证回信里提);缺就空,卡片行自动让位给颜色
     fabric: null,
-    // sizeChart「库里什么形态给什么形态」:字符串当原文,对象交给 size_spec 运行时校验,
-    // 校验不过 UI 自动降级——这条链路本来就是防脏数据的
-    size_chart: str(r.sizeChart),
+    // sizeChart 实测形态(2026-08-04 实连):[{sizeName, measures:{裤长:101.5,…}}]——
+    // 中文部位键,和 web 的 SizeSpec(英文标准键)不同形。塞给 size_spec 会被
+    // shouldRenderSizeTable 拒掉 → 详情页尺码表整个消失。所以先诚实降级:
+    // 转成可读文本走 size_chart 原文通道,顾客照样看得到全部数字。
+    // TODO(discussion 文档有账):移植 kefu 的中文部位→标准键映射,让试穿组件也能吃
+    size_chart: sizeChartText(r.sizeChart),
     detail_text: null,
     image_url: str(r.cover),
     images: strArr(r.images),
-    size_spec: typeof r.sizeChart === "object" ? r.sizeChart : null,
+    size_spec: null,
     shape_spec: null,
     sort_order: i,
     category: str(r.category),
-    colors: strArr(r.colors),
+    colors: [...new Set(strArr(r.colors).map(cleanColor).filter(Boolean))],
   };
 }
 

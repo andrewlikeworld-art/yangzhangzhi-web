@@ -154,7 +154,8 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   return (
     <div className="flex gap-2 text-sm">
       <span className="w-10 shrink-0 text-muted-foreground">{label}</span>
-      <span className="flex-1">{children}</span>
+      {/* pre-line:尺码表原文按行给(shop 通道一码一行),塌成一段就没法读了 */}
+      <span className="flex-1 whitespace-pre-line">{children}</span>
     </div>
   );
 }
