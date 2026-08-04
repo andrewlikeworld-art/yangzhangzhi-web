@@ -53,7 +53,7 @@ export function KefuProductSheet({
               <Heart
                 className={cn(
                   "size-5",
-                  selected ? "fill-[var(--brand)] text-[var(--brand)]" : "text-muted-foreground",
+                  selected ? "fill-[var(--editorial-red)] text-[var(--editorial-red)]" : "text-muted-foreground",
                 )}
               />
             </button>
@@ -96,7 +96,7 @@ export function KefuProductSheet({
               <div>
                 <h2 className="text-base font-semibold">{product.title}</h2>
                 {product.price && (
-                  <p className="mt-1 font-medium text-[var(--brand)]">{product.price}</p>
+                  <p className="mt-1 font-medium text-[var(--editorial-red)]">{product.price}</p>
                 )}
               </div>
               {product.fabric && <Row label="面料">{product.fabric}</Row>}

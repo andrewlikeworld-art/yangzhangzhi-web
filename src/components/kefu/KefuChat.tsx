@@ -198,10 +198,10 @@ export function KefuChat({ products }: { products: Product[] }) {
                   <img
                     src={p.image_url}
                     alt={p.title}
-                    className="aspect-[3/4] w-full rounded-lg border object-cover"
+                    className="aspect-[3/4] w-full border border-hairline object-cover"
                   />
                 ) : (
-                  <div className="flex aspect-[3/4] w-full items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+                  <div className="flex aspect-[3/4] w-full items-center justify-center border border-hairline bg-muted text-muted-foreground">
                     <ShoppingBag className="size-5 opacity-60" />
                   </div>
                 )}
@@ -215,7 +215,7 @@ export function KefuChat({ products }: { products: Product[] }) {
       {/* 当前商品条(有则显示,可清除) */}
       {currentProduct && (
         <div className="flex shrink-0 items-center gap-2 border-b bg-muted/40 px-3 py-1.5 text-xs">
-          <ShoppingBag className="size-3.5 text-[var(--brand)]" />
+          <ShoppingBag className="size-3.5 text-[var(--editorial-red)]" />
           <span className="truncate">
             当前咨询商品:<span className="font-medium">{currentProduct.title}</span>
             {currentProduct.price ? ` · ${currentProduct.price}` : ""}
@@ -233,8 +233,8 @@ export function KefuChat({ products }: { products: Product[] }) {
       {/* 消息 */}
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <div className="mx-auto max-w-md px-6 py-12 text-center">
-            <ShoppingBag className="mx-auto mb-3 size-8 text-[var(--brand)] opacity-50" />
+          <div className="mx-auto max-w-[var(--measure-prose)] px-6 py-16 text-center">
+            <ShoppingBag className="mx-auto mb-3 size-8 text-[var(--editorial-red)] opacity-50" />
             <p className="text-sm text-muted-foreground">{siteConfig.consultEmptyHint}</p>
           </div>
         ) : (
@@ -248,13 +248,13 @@ export function KefuChat({ products }: { products: Product[] }) {
                 <div key={m.id}>
                   <MessageBubble msg={m} personaName={siteConfig.personaName} />
                   {m.cards && m.cards.length > 0 && (
-                    <div className="mb-3 ml-4 mr-4 max-w-md">
+                    <div className="mx-auto mb-3 max-w-[var(--measure-prose)] px-4">
                       {/* 点卡片开半屏详情;卡 id 不在本页商品列表里时 detailProduct 落 null,自然无事发生 */}
                       <ProductCardsRow cards={m.cards} onOpen={setDetailId} />
                     </div>
                   )}
                   {fitSpec && (
-                    <div className="mb-3 ml-4 mr-4 max-w-md">
+                    <div className="mx-auto mb-3 max-w-[var(--measure-prose)] px-4">
                       <FitVisualizer
                         spec={fitSpec}
                         shape={normalizeShapeSpec(fitProduct?.shape_spec, fitSpec.category)}
@@ -271,7 +271,7 @@ export function KefuChat({ products }: { products: Product[] }) {
 
       {/* 输入 */}
       <div className="shrink-0 border-t bg-background">
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-[var(--measure-prose)]">
           <ChatInput
             value={draft}
             onChange={setDraft}

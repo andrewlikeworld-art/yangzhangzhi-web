@@ -39,10 +39,14 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  /* 配方:杂志页面不做圆角。全部归零,组件里现有的 rounded-* 类自动跟着变方,
+     不用逐个改。rounded-full 刻意不覆盖——心选/发送那种功能圆钮仍需要正圆。 */
   --radius-sm: 0px;
   --radius-md: 0px;
   --radius-lg: 0px;
   --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
 }
 
 :root {

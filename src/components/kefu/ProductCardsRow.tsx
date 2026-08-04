@@ -39,17 +39,17 @@ export function ProductCardsRow({
                 <img
                   src={sizedImage(c.cover, CARD_IMG_WIDTH)}
                   alt={c.title}
-                  className="aspect-[3/4] w-full rounded-lg border object-cover"
+                  className="aspect-[3/4] w-full border border-hairline object-cover"
                   loading="lazy"
                   decoding="async"
                 />
               ) : (
-                <div className="flex aspect-[3/4] w-full items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+                <div className="flex aspect-[3/4] w-full items-center justify-center border border-hairline bg-muted text-muted-foreground">
                   <ShoppingBag className="size-5 opacity-60" />
                 </div>
               )}
               {badge && (
-                <span className="absolute left-1 top-1 rounded bg-[var(--brand)] px-1 py-0.5 text-[10px] leading-none text-white">
+                <span className="absolute left-1 top-1 rounded bg-[var(--editorial-red)] px-1 py-0.5 text-[10px] leading-none text-white">
                   {badge}
                 </span>
               )}

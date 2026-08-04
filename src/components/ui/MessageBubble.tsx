@@ -9,12 +9,13 @@ import { cn } from "@/lib/utils";
 import type { KefuMsg } from "@/stores/kefuStore";
 
 export function MessageBubble({ msg, personaName }: { msg: KefuMsg; personaName: string }) {
+  // 系统提示(转人工等):杂志的编者按做法——发丝线上下夹一行小字,不做胶囊
   if (msg.role === "system") {
     return (
-      <div className="px-4 py-2 text-center">
-        <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-          {msg.content}
-        </span>
+      <div className="mx-auto my-3 flex max-w-[var(--measure-prose)] items-center gap-3 px-4">
+        <span className="h-px flex-1 bg-hairline" />
+        <span className="u-kicker shrink-0">{msg.content}</span>
+        <span className="h-px flex-1 bg-hairline" />
       </div>
     );
   }
@@ -22,18 +23,24 @@ export function MessageBubble({ msg, personaName }: { msg: KefuMsg; personaName:
   const isUser = msg.role === "user";
 
   return (
-    <div className={cn("flex px-4 py-2", isUser ? "justify-end" : "justify-start")}>
-      <div className={cn("min-w-0 max-w-[85%] md:max-w-[75%]")}>
-        {!isUser && (
-          <p className="mb-1 text-[11px] tracking-wide text-muted-foreground">{personaName}</p>
-        )}
+    // 读行宽约束:桌面上气泡最宽只到 68ch。原先是 max-w-75%,在 1600px 宽屏上
+    // 一行能塞七八十个汉字,远超中文舒适行长(30~40 字),读起来要来回扫。
+    <div
+      className={cn(
+        "mx-auto flex max-w-[var(--measure-prose)] px-4 py-2",
+        isUser ? "justify-end" : "justify-start",
+      )}
+    >
+      <div className={cn("min-w-0 max-w-[88%]")}>
+        {!isUser && <p className="u-kicker mb-1.5">{personaName}</p>}
         <div
           className={cn(
-            "rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
+            "px-4 py-2.5 text-[0.9375rem] leading-relaxed",
+            // 配方零圆角。顾客侧用墨底反白,客服侧用发丝线框——靠形状而非颜色区分
             isUser
               ? "bg-[var(--bubble-user)] text-[var(--bubble-user-fg)]"
-              : "border bg-card text-card-foreground",
-            msg.error && "border-destructive/40 text-destructive",
+              : "border border-hairline bg-card text-card-foreground",
+            msg.error && "border-destructive text-destructive",
           )}
         >
           {isUser ? (

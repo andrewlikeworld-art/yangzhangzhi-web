@@ -47,8 +47,9 @@ export function ChatInput({
         rows={1}
         placeholder={placeholder}
         className={cn(
-          "min-h-9 flex-1 resize-none rounded-2xl border bg-background px-3.5 py-2 text-sm leading-relaxed",
-          "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+          // 配方零圆角:输入框是发丝线方框,不是胶囊
+          "min-h-9 flex-1 resize-none border border-hairline bg-background px-3.5 py-2 text-[0.9375rem] leading-relaxed",
+          "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ink",
         )}
       />
       <button
@@ -59,9 +60,9 @@ export function ChatInput({
         className={cn(
           // u-hit:视觉仍是 36px 圆钮,可点范围补到 52px(手机上 36px 点不准)。
           // relative 是 u-hit 的前提——伪元素要定位在自己身上,不能挂到祖先上
-          "u-hit relative inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
+          "u-hit relative inline-flex size-9 shrink-0 items-center justify-center transition-colors",
           canSend
-            ? "bg-primary text-primary-foreground hover:bg-primary/85"
+            ? "bg-ink text-[var(--paper)] hover:bg-[var(--editorial-red)]"
             : "bg-muted text-muted-foreground",
         )}
       >
