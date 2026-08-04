@@ -7,3 +7,10 @@ build/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# 第三方 AI skill(2026-08-04 装入,用于 UI 设计):
+# 和 node_modules 同性质——外部代码,靠 skills-lock.json 复原,不进产品仓库。
+# 复原命令:npx skills add ConardLi/garden-skills -s web-design-engineer
+#          npx skills add https://github.com/Leonxlnx/taste-skill
+.agents/
+.claude/skills/

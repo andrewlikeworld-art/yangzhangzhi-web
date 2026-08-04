@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  // 顾客站是聊天形态,禁止双指缩放导致布局错位
-  maximumScale: 1,
-  userScalable: false,
+  // 2026-08-04:恢复双指缩放。原先 maximumScale:1 + userScalable:false 是
+  // 小程序 webview 时代留下的,搬到公开网页上是无障碍缺陷(WCAG 1.4.4)——
+  // 视力不好的顾客放不大页面。布局错位应该靠响应式解决,不是靠禁用缩放。
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -30,7 +30,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `(function(){var v=window.visualViewport;if(!v)return;function s(){if(v.height>0)document.documentElement.style.setProperty('--app-height',v.height+'px')}s();v.addEventListener('resize',s)})()`,
           }}
         />
-        <div className="h-app overflow-hidden">{children}</div>
+        {/* 2026-08-04 结构重做:这里原本是 <div class="h-app overflow-hidden">,
+            它把**整站**锁成不可滚动的固定高度壳——正是「手机 UI 投射到网页」的病根:
+            落地页再长也滚不动,只能靠内部容器滚。
+            现在壳由各视图自己决定:落地页走正常文档流,咨询页自己套 h-app。 */}
+        {children}
       </body>
     </html>
   );

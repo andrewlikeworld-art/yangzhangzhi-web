@@ -4,6 +4,10 @@
 // 刻意造出两条渲染路径,方便验收:
 //   - 带 size_spec 的(1/2/4/5 件)→ 渲染 <SizeDiagram/> + <SizeTable/>,客服可触发试穿组件
 //   - 不带 size_spec 只有 size_chart 原文的(3/6 件)→ 降级显示原文
+// ⚠️ 2026-08-04:image_url 改指向**线上真实商品封面**(腾讯云 CDN,公开无签名)。
+// 原先是 public/placeholder/*.svg 三张灰色线稿——做 UI 设计时线稿完全判断不了
+// 真实观感(街拍照片的构图、水印位置、裁切效果都看不出来)。
+// 那三张线稿还在 public/placeholder/,要退回把 image_url 改回 "/placeholder/xxx.svg" 即可。
 import type { Product } from "@/lib/types";
 
 export const mockProducts: Product[] = [
@@ -15,7 +19,7 @@ export const mockProducts: Product[] = [
     size_chart: null,
     detail_text:
       "垂坠感强的醋酸缎面,自带微光泽但不廉价。后背隐形拉链,内衬同色。\n模特身高 168cm 体重 50kg,穿 S 码。",
-    image_url: "/placeholder/dress.svg",
+    image_url: "https://636c-cloud1-d9gji2elf658d9e70-1448707702.tcb.qcloud.la/products/cover_1782794427668_54028.jpg",
     images: ["/placeholder/dress.svg"],
     size_spec: {
       category: "dress",
@@ -44,7 +48,7 @@ export const mockProducts: Product[] = [
     size_chart: null,
     detail_text:
       "落地垂感的直筒版型,腰头后侧松紧。水洗工艺,越穿越软。\n模特身高 172cm 体重 54kg,穿 M 码。",
-    image_url: "/placeholder/pants.svg",
+    image_url: "https://636c-cloud1-d9gji2elf658d9e70-1448707702.tcb.qcloud.la/products/cover_1782795940654_104782.jpg",
     images: ["/placeholder/pants.svg"],
     size_spec: {
       category: "pants",
@@ -74,7 +78,7 @@ export const mockProducts: Product[] = [
     // 这件没有结构化尺码表,走 size_chart 原文降级路径
     size_chart: "S 肩38 胸92 衣长62\nM 肩39 胸96 衣长63\nL 肩40 胸100 衣长64",
     detail_text: "16 姆米重磅真丝,不透。小方领可开可扣。建议手洗或干洗。",
-    image_url: "/placeholder/top.svg",
+    image_url: "https://636c-cloud1-d9gji2elf658d9e70-1448707702.tcb.qcloud.la/products/cover_1783411466808_631391.jpg",
     images: ["/placeholder/top.svg"],
     size_spec: null,
     shape_spec: null,
@@ -88,7 +92,7 @@ export const mockProducts: Product[] = [
     size_chart: null,
     detail_text:
       "垫肩廓形但不夸张,可内搭薄毛衫。双开衩后摆。\n模特身高 170cm 体重 52kg,穿 S 码。",
-    image_url: "/placeholder/top.svg",
+    image_url: "https://636c-cloud1-d9gji2elf658d9e70-1448707702.tcb.qcloud.la/products/cover_1783412920094_689310.jpg",
     images: ["/placeholder/top.svg"],
     size_spec: {
       category: "outerwear",
@@ -115,7 +119,7 @@ export const mockProducts: Product[] = [
     fabric: "涤纶 95% 氨纶 5%",
     size_chart: null,
     detail_text: "高腰显腿长,A 字摆走路有型。侧隐形拉链,内衬防走光。",
-    image_url: "/placeholder/dress.svg",
+    image_url: "https://636c-cloud1-d9gji2elf658d9e70-1448707702.tcb.qcloud.la/products/cover_1783413389171_922824.jpg",
     images: ["/placeholder/dress.svg"],
     size_spec: {
       category: "skirt",
@@ -142,7 +146,7 @@ export const mockProducts: Product[] = [
     fabric: "羊毛 50% 腈纶 50%",
     size_chart: "均码 胸围 96 衣长 58 袖长 57(弹性大,适合 S-L)",
     detail_text: "细羊毛不扎人,弹性大所以做均码。冷水手洗平铺阴干。",
-    image_url: "/placeholder/top.svg",
+    image_url: "https://636c-cloud1-d9gji2elf658d9e70-1448707702.tcb.qcloud.la/products/cover_1783747448447_321495.jpg",
     images: ["/placeholder/top.svg"],
     size_spec: null,
     shape_spec: null,

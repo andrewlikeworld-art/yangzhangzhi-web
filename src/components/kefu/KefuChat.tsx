@@ -153,7 +153,9 @@ export function KefuChat({ products }: { products: Product[] }) {
   }
 
   return (
-    <div className="relative flex h-full flex-col">
+    // 咨询页保留 app 壳:输入框钉底、消息区内部滚动,是 product UI 的正确形态。
+    // 2026-08-04 结构重做后 h-app 由本组件自己套(原先在 root layout,把落地页也锁死了)。
+    <div className="relative flex h-app flex-col overflow-hidden">
       <AppHeader
         right={
           <>

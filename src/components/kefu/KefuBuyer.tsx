@@ -9,6 +9,8 @@
 import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { Masthead } from "@/components/kefu/Masthead";
+import { LandingHero } from "@/components/kefu/LandingHero";
+import { SiteFooter } from "@/components/kefu/SiteFooter";
 import { ChatInput } from "@/components/ui/ChatInput";
 import { useKefuStore } from "@/stores/kefuStore";
 import { siteConfig } from "@/site.config";
@@ -52,36 +54,43 @@ function RecommendPage({ products }: { products: Product[] }) {
     setView("consult");
   }
 
+  // 头图用第一件在售商品。取不到图就不渲染头图区,页面直接从目录开始
+  const heroProduct = products.find((p) => p.image_url) ?? null;
+
   return (
-    <div className="relative flex h-full flex-col">
-      {/* 报头式站头(2026-08-04 目录式改版):字标居中,操作区绝对定位在右 */}
+    // 2026-08-04 结构重做:落地页走**正常文档流滚动**,不再是固定高度 app 壳。
+    // 底部输入条改成 sticky 而不是 flex 固定行——页面能一直滚到页脚,
+    // 输入条始终贴在视口底部可用。
+    <div className="relative min-h-dvh pb-[env(safe-area-inset-bottom)]">
       <Masthead
+        left={
+          selectedIds.length > 0 ? (
+            <span className="u-numeral text-[0.6875rem]">已选 {selectedIds.length} 件</span>
+          ) : null
+        }
         right={
-          <>
-            {selectedIds.length > 0 && (
-              <span className="hidden text-[0.6875rem] tabular-nums text-muted-foreground sm:inline">
-                已选 {selectedIds.length} 件
-              </span>
-            )}
-            {/* 不打字也能直接进聊天页 */}
-            <button
-              type="button"
-              onClick={() => setView("consult")}
-              className="u-hit relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[0.6875rem] hover:bg-accent"
-              style={{ transitionDuration: "var(--dur-fast)" }}
-            >
-              <MessageCircle className="size-3.5" />
-              聊天咨询
-            </button>
-          </>
+          /* 配方:CTA 不做成填充按钮,做成带发丝线的排版链接 */
+          <button
+            type="button"
+            onClick={() => setView("consult")}
+            className="u-hit relative inline-flex shrink-0 items-center gap-1.5 border-b border-ink pb-0.5 text-[0.6875rem] text-ink transition-colors hover:border-[var(--editorial-red)] hover:text-[var(--editorial-red)]"
+            style={{ transitionDuration: "var(--dur-fast)" }}
+          >
+            <MessageCircle className="size-3.5" />
+            聊天咨询
+          </button>
         }
       />
 
+      <LandingHero product={heroProduct} onOpenDetail={setDetailId} />
+
       <KefuRecommend products={products} onOpenDetail={setDetailId} />
 
-      {/* 底部输入条:推荐页也永远在 */}
-      <div className="shrink-0 border-t bg-background">
-        <div className="mx-auto max-w-2xl">
+      <SiteFooter />
+
+      {/* 输入条:sticky 贴底,始终可用又不挡住文档滚动 */}
+      <div className="sticky bottom-0 z-20 border-t border-hairline bg-background/95 backdrop-blur">
+        <div className="mx-auto max-w-[var(--measure-prose)] px-2">
           <ChatInput
             value={draft}
             onChange={setDraft}
