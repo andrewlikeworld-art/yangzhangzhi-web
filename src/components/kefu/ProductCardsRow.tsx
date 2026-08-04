@@ -4,7 +4,11 @@
 // cover 是 2 小时时效的临时 URL,不做任何本地缓存;本站消息本就不持久化,
 // 刷新后卡片随消息一起消失是预期行为,不是丢数据。
 import { ShoppingBag } from "lucide-react";
+import { sizedImage } from "@/lib/image";
 import type { KefuProductCard } from "@/lib/kefu-client";
+
+/** 聊天里的卡只有 96px 宽,300 覆盖 2 倍屏足够 */
+const CARD_IMG_WIDTH = 300;
 
 /** reason → 角标文案。读不到 reason(旧版本/字段缺损)就不显示角标 */
 const REASON_LABEL: Record<string, string> = { outfit: "搭配", recommend: "推荐" };
@@ -33,9 +37,11 @@ export function ProductCardsRow({
               {c.cover ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={c.cover}
+                  src={sizedImage(c.cover, CARD_IMG_WIDTH)}
                   alt={c.title}
                   className="aspect-[3/4] w-full rounded-lg border object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 <div className="flex aspect-[3/4] w-full items-center justify-center rounded-lg border bg-muted text-muted-foreground">

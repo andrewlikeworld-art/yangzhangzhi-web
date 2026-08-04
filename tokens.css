@@ -1,0 +1,57 @@
+/* Hallmark · macrostructure: Catalogue · nav: N6 masthead · footer: Ft2 inline-single-line
+ * theme: project-palette-preserved (暖米纸 #ecebe6 · 墨 #23241f · 玫瑰 #b04a5a)
+ * genre: editorial · enrichment: none (真实街拍摄影即装饰) · studied: no
+ * pre-emit critique: P5 H4 E4 S5 R5 V4
+ *
+ * 设计系统的可移植副本。真源是 src/app/globals.css 的 :root;
+ * 这份供换站点 / 交给其它工具时整块带走。改动请两处同步。
+ */
+:root {
+  /* ── 颜色(沿用站点既有色板,未改动)── */
+  --color-paper: #ecebe6;
+  --color-surface: #fbfaf7;
+  --color-ink: #23241f;
+  --color-graphite: #5c5f58;
+  --color-rule: #dedcd4;
+  --color-brand: #b04a5a;
+
+  /* ── 间距:4pt 制 ── */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  /* ── 字号 ── */
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-display-s: clamp(1.125rem, 2.5vw, 1.5rem);
+
+  /* ── 字距:品牌的核心识别特征 ──
+     字标那种超宽字距是从商品图水印上量出来的,不是我发明的。
+     它是这套设计里唯一的「签名动作」,别调小。 */
+  --track-wordmark: 0.42em;
+  --track-label: 0.26em;
+  --track-body: 0.01em;
+
+  /* ── 线 ── */
+  --rule-hairline: 1px;
+
+  /* ── 动效:项目未装动效库,克制到只剩一条 ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+
+  /* ── 版心 ──
+     目录页要吃满宽才能摆下 5 列;聊天页另有自己的读行宽限制。 */
+  --measure-page: 1600px;
+  --measure-prose: 68ch;
+}

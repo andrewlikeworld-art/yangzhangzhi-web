@@ -57,7 +57,9 @@ export function ChatInput({
         disabled={!canSend}
         aria-label="发送"
         className={cn(
-          "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
+          // u-hit:视觉仍是 36px 圆钮,可点范围补到 52px(手机上 36px 点不准)。
+          // relative 是 u-hit 的前提——伪元素要定位在自己身上,不能挂到祖先上
+          "u-hit relative inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
           canSend
             ? "bg-primary text-primary-foreground hover:bg-primary/85"
             : "bg-muted text-muted-foreground",

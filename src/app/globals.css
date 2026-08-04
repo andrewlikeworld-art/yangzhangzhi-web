@@ -63,6 +63,30 @@
   /* 聊天气泡:顾客侧用品牌色,客服侧用卡片底 */
   --bubble-user: var(--brand);
   --bubble-user-fg: #ffffff;
+
+  /* ── Hallmark 2026-08-04:目录式改版补的排版 token ──
+     色板一个没动(它本来就是暖调,配低饱和街拍图是对的)。
+     补的只是「层级」:字距、间距、缓动、版心。可移植副本见根目录 tokens.css。 */
+
+  /* 字距。字标那种超宽字距是从商品图水印上量出来的,是品牌既有识别特征,不是发明的 */
+  --track-wordmark: 0.42em;
+  --track-label: 0.26em;
+
+  /* 4pt 间距制 */
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+
+  /* 缓动与时长:项目没装动效库,克制到只用 opacity 一条 */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+
+  /* 版心:目录页吃满宽才摆得下 5 列 */
+  --measure-page: 1600px;
 }
 
 @layer base {
@@ -83,6 +107,46 @@
      由 layout 里的内联脚本把 visualViewport.height 写进 --app-height。 */
   .h-app {
     height: var(--app-height, 100dvh);
+  }
+
+  /* 字标:超宽字距会在最后一个字母右侧留出一份空,导致「看起来没居中」。
+     负右外边距把那一份补回来——光学居中,不是数学居中。 */
+  .u-wordmark {
+    letter-spacing: var(--track-wordmark);
+    margin-right: calc(var(--track-wordmark) * -1);
+  }
+  .u-label {
+    letter-spacing: var(--track-label);
+    margin-right: calc(var(--track-label) * -1);
+  }
+
+  /* 命中区扩展:**视觉尺寸不变**,可点范围向外补 8px。
+     心选图标 28px、发送键 36px 在手机上都点不准(WCAG 要求 ≥44px),
+     但把圆圈画大会破坏版面——用伪元素补是唯一两全的做法。
+     ⚠️ 这里**刻意不写 position** —— 写了会覆盖调用处的 `absolute`,
+     把绝对定位的元素打回文档流(2026-08-04 真机踩过:心形掉到图片下方)。
+     调用处自己保证是定位元素(已有 absolute,或另加 relative)。 */
+  .u-hit::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+  }
+}
+
+/* 焦点环:键盘用户必须看得见,且**不做动画**(动画会让它迟到) */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}
+
+/* 唯一的动效:商品图 hover 时轻微减淡,提示「可点」。
+   刻意不用 hover 放大——放大会把裁掉的虚化边条重新露出来。 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
 

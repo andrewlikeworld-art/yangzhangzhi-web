@@ -11,6 +11,13 @@ export const siteConfig = {
   /** 完整品牌名,用于 <title> 和 SEO */
   brandName: "杨张治服饰",
 
+  /** 拉丁字标。与商品图上烧进去的水印同一个写法(全大写 + 超宽字距由 CSS 给) */
+  wordmark: "Yang Zhang Zhi",
+
+  /** ICP 备案号。境内站上线**法定必须**在页脚展示;备案下来填这里,页脚自动出现。
+   *  留空时页脚不渲染这一段(避免线上出现「待填」字样)。 */
+  icpNumber: "",
+
   /** 站点描述,用于 <meta description> */
   description: "杨张治女装 · 店主推荐与 AI 尺码顾问",
 

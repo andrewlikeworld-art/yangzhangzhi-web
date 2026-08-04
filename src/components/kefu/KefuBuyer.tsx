@@ -8,7 +8,7 @@
 // 不再走 useKefuData(Supabase RLS 查询);文案统一取 site.config。
 import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
-import { AppHeader } from "@/components/ui/AppHeader";
+import { Masthead } from "@/components/kefu/Masthead";
 import { ChatInput } from "@/components/ui/ChatInput";
 import { useKefuStore } from "@/stores/kefuStore";
 import { siteConfig } from "@/site.config";
@@ -54,17 +54,21 @@ function RecommendPage({ products }: { products: Product[] }) {
 
   return (
     <div className="relative flex h-full flex-col">
-      <AppHeader
+      {/* 报头式站头(2026-08-04 目录式改版):字标居中,操作区绝对定位在右 */}
+      <Masthead
         right={
           <>
             {selectedIds.length > 0 && (
-              <span className="text-xs text-muted-foreground">已选 {selectedIds.length} 件</span>
+              <span className="hidden text-[0.6875rem] tabular-nums text-muted-foreground sm:inline">
+                已选 {selectedIds.length} 件
+              </span>
             )}
             {/* 不打字也能直接进聊天页 */}
             <button
               type="button"
               onClick={() => setView("consult")}
-              className="mr-1 inline-flex h-8 shrink-0 items-center gap-1 rounded-full border px-3 text-xs font-medium hover:bg-accent"
+              className="u-hit relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[0.6875rem] hover:bg-accent"
+              style={{ transitionDuration: "var(--dur-fast)" }}
             >
               <MessageCircle className="size-3.5" />
               聊天咨询
