@@ -11,7 +11,8 @@
 // 传输从 SSE 换成 cn-kefu 的发/取轮询,细节全在 lib/kefu-client.ts;
 // 这里只消费回调,所以将来换回 SSE 也不用改本文件。
 import { useEffect, useRef, useState } from "react";
-import { ShoppingBag, Store, RotateCcw } from "lucide-react";
+import { ShoppingBag, Store, RotateCcw, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/ui/AppHeader";
 import { ChatInput } from "@/components/ui/ChatInput";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,17 @@ import { KefuProductSheet } from "./KefuProductSheet";
 import { FitVisualizer } from "./FitVisualizer";
 import { ProductCardsRow } from "./ProductCardsRow";
 
-export function KefuChat({ products }: { products: Product[] }) {
+export function KefuChat({
+  products,
+  /** 悬浮挂件模式(2026-08-04 参考图复刻):外壳高度由 ChatDock 给,
+   *  顶栏右侧的「回店主推荐」换成「收起」——挂件里本来就没离开首页。 */
+  dock,
+  onClose,
+}: {
+  products: Product[];
+  dock?: boolean;
+  onClose?: () => void;
+}) {
   const currentProductId = useKefuStore((s) => s.currentProductId);
   const setCurrentProduct = useKefuStore((s) => s.setCurrentProduct);
   const draft = useKefuStore((s) => s.draft);
@@ -153,20 +164,20 @@ export function KefuChat({ products }: { products: Product[] }) {
   }
 
   return (
-    // 咨询页保留 app 壳:输入框钉底、消息区内部滚动,是 product UI 的正确形态。
-    // 2026-08-04 结构重做后 h-app 由本组件自己套(原先在 root layout,把落地页也锁死了)。
-    <div className="relative flex h-app flex-col overflow-hidden">
+    // 整页模式保留 app 壳(输入框钉底、消息区内部滚动,是 product UI 的正确形态);
+    // 挂件模式下高度由 ChatDock 给,这里只负责撑满。
+    <div className={cn("relative flex flex-col overflow-hidden", dock ? "h-full" : "h-app")}>
       <AppHeader
         right={
           <>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setView("recommend")}
-              title="回店主推荐"
-              aria-label="回店主推荐"
+              onClick={() => (dock ? onClose?.() : setView("recommend"))}
+              title={dock ? "收起" : "回店主推荐"}
+              aria-label={dock ? "收起客服" : "回店主推荐"}
             >
-              <Store className="size-4" />
+              {dock ? <X className="size-4" /> : <Store className="size-4" />}
             </Button>
             <Button
               variant="ghost"

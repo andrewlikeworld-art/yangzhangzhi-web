@@ -25,6 +25,16 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
     "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
 
+  /* ⚠️ 配方色必须在这里注册,组件里的 bg-ink / border-hairline 之类才解析得了。
+     只写 :root 是不够的——Tailwind v4 只认 @theme 里的 --color-* 前缀。
+     2026-08-04 实测:漏注册时 bg-ink 静默失效,公告条变成"奶油底+奶油字"整条隐形,
+     Hero 的实心按钮也没了底色。**不报错、只是消失**,是最难查的那类。 */
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-hairline: var(--hairline);
+  --color-editorial-red: var(--editorial-red);
+  --color-olive: var(--olive);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
