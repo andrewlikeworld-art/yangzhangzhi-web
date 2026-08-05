@@ -161,7 +161,8 @@ export async function streamKefuReply(
       continue;
     }
 
-    if (payload.content) cb.onContent(payload.content);
+    // content 全量覆盖:哪怕清空重来(真流式行为)也要传空串,不能用真值判断跳过
+    cb.onContent(payload.content);
 
     for (const [i, ev] of (payload.events ?? []).entries()) {
       const key = `${i}:${ev.type}`;
